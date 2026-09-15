@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DispatchAgent.AI — AWS Strands Multi-Agent Emergency Response</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-rose-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-slate-950 shadow-lg shadow-rose-500/20">
+          <i class="fa-solid fa-tower-broadcast text-lg font-black"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-extrabold text-lg tracking-tight">DispatchAgent.AI</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40">AWS CDS 2026</span>
+          </div>
+          <p class="text-xs text-slate-400">Autonomous Telephony Outbound Voice & Strands A2A Swarm</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <span class="inline-flex items-center space-x-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>A2A Swarm Live</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left: Incident Feed & Action Console (7 cols) -->
+    <div class="lg:col-span-7 space-y-6">
+
+      <!-- Active Incident Card -->
+      <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-black uppercase px-2.5 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/40">
+            CRITICAL • P1 OUTAGE
+          </span>
+          <span class="text-xs font-mono text-slate-400" id="incIdDisplay">INC-1042</span>
+        </div>
+
+        <div>
+          <h2 class="text-xl font-black text-white" id="serviceNameDisplay">checkout-payment-api</h2>
+          <p class="text-xs text-rose-300 font-mono mt-1" id="metricDisplay">HTTP 500 error rate spiked to 14.8% (threshold: 1.0%)</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs">
+          <div>
+            <span class="text-slate-500 text-[11px]">Primary On-Call</span>
+            <div class="font-bold text-slate-200">Alex Chen (+1-555-0199)</div>
+          </div>
+          <div>
+            <span class="text-slate-500 text-[11px]">Dispatch Status</span>
+            <div class="font-bold text-amber-400" id="incStatusDisplay">DISPATCHING</div>
+          </div>
+        </div>
+
+        <!-- Telephony Controls -->
+        <div class="pt-2 flex items-center space-x-3">
+          <button id="btnDialCall" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:opacity-90 text-slate-950 font-black text-xs shadow-lg shadow-rose-500/20 transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-phone-volume"></i>
+            <span>Simulate Outbound Chime Voice Call</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Interactive Call Dialogue Box (Simulated Phone Call) -->
+      <div id="phoneCallBox" class="p-5 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border border-amber-500/40 hidden space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <i class="fa-solid fa-phone text-sm"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white">Call Connected: Alex Chen</h4>
+              <span class="text-[10px] text-emerald-400 font-mono">AWS Chime SIP Trunk • Low Latency</span>
+            </div>
+          </div>
+          <span class="text-xs font-mono text-slate-400">00:18</span>
+        </div>
+
+        <!-- Agent Speech Bubble -->
+        <div class="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/60 text-xs leading-relaxed text-slate-200">
+          <strong class="text-amber-400">DispatchAgent:</strong>
+          <span id="agentPromptText">Hello Alex Chen. This is AWS DispatchAgent with a high-priority P1 alert on checkout-payment-api. Please state your instructions or say acknowledge.</span>
+        </div>
+
+        <!-- Quick Speech Prompts -->
+        <div class="space-y-2">
+          <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Voice Response Simulation (Bedrock Converse Tool Calling):</span>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="simulateSpeech('I acknowledge the outage. Please roll back deployment to v2.4.1 right away.')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-left text-xs text-slate-200 border border-slate-700 transition">
+              🗣️ "Acknowledge & Rollback to v2.4.1"
+            </button>
+            <button onclick="simulateSpeech('Acknowledge. Drain canary traffic and scale up ECS tasks by 50%.')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-left text-xs text-slate-200 border border-slate-700 transition">
+              🗣️ "Drain canary & scale ECS"
+            </button>
+          </div>
+        </div>
+
+        <!-- Response result box -->
+        <div id="callResultBox" class="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/40 text-xs hidden space-y-1">
+          <strong class="text-emerald-400">Action Confirmed:</strong>
+          <p id="callResultText" class="text-slate-300"></p>
+        </div>
+      </div>
+
+      <!-- Action Timeline -->
+      <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Incident Audit Log</h3>
+        <div id="actionTimeline" class="space-y-2 text-xs">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Strands A2A Swarm Telemetry & Post-Mortem (5 cols) -->
+    <div class="lg:col-span-5 space-y-6">
+      
+      <!-- A2A Protocol Telemetry -->
+      <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
+            <i class="fa-solid fa-network-wired text-rose-400"></i>
+            <span>Strands A2A Protocol Stream</span>
+          </span>
+          <span class="text-[10px] font-mono text-slate-500">Agent-to-Agent</span>
+        </div>
+
+        <div id="a2aStream" class="space-y-2 font-mono text-[11px] max-h-72 overflow-y-auto">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Automated Executive Post-Mortem -->
+      <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
+            <i class="fa-solid fa-file-lines text-amber-400"></i>
+            <span>Executive Post-Mortem</span>
+          </h3>
+          <button id="btnRefreshReport" class="text-[11px] text-amber-400 hover:underline">Regenerate</button>
+        </div>
+        <div id="postMortemBox" class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800/80 text-xs text-slate-300 space-y-2 whitespace-pre-wrap font-sans leading-relaxed">
+          <!-- Post-mortem summary injected via JS -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    let currentCallId = null;
+    let currentIncidentId = null;
+
+    async function loadState() {
+      const res = await fetch('/api/state');
+      const data = await res.json();
+
+      if (data.incidents.length > 0) {
+        const inc = data.incidents[0];
+        currentIncidentId = inc.id;
+        document.getElementById('incIdDisplay').innerText = inc.id;
+        document.getElementById('serviceNameDisplay').innerText = inc.serviceName;
+        document.getElementById('metricDisplay').innerText = inc.metricViolation;
+        document.getElementById('incStatusDisplay').innerText = inc.status;
+
+        const timeline = document.getElementById('actionTimeline');
+        timeline.innerHTML = inc.actionLog.map(l => `
+          <div class="p-2 rounded-xl bg-slate-950 border border-slate-800/80 flex items-center justify-between">
+            <span class="text-slate-300">${l.message}</span>
+            <span class="text-[10px] text-slate-500 font-mono">${l.timestamp.split('T')[1].split('.')[0]}</span>
+          </div>
+        `).join('');
+      }
+
+      const a2aContainer = document.getElementById('a2aStream');
+      a2aContainer.innerHTML = data.a2aLogs.map(m => `
+        <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 space-y-1">
+          <div class="flex justify-between text-[10px]">
+            <span class="text-rose-400 font-bold">${m.sender} ➔ ${m.recipient}</span>
+            <span class="text-slate-500">${m.type}</span>
+          </div>
+          <div class="text-slate-400 text-[10px] truncate">${JSON.stringify(m.payload)}</div>
+        </div>
+      `).join('');
+
+      loadPostMortem();
+    }
+
+    async function loadPostMortem() {
+      const res = await fetch('/api/report');
+      const report = await res.json();
+      document.getElementById('postMortemBox').innerText = report.postMortemMarkdown;
+    }
+
+    document.getElementById('btnDialCall').onclick = async () => {
+      const res = await fetch('/api/call/initiate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ incidentId: currentIncidentId })
+      });
+      const data = await res.json();
+      currentCallId = data.call.callId;
+      document.getElementById('agentPromptText').innerText = data.call.agentSpokenPrompt;
+      document.getElementById('phoneCallBox').classList.remove('hidden');
+      loadState();
+    };
+
+    window.simulateSpeech = async (spokenText) => {
+      if (!currentCallId) return;
+      const res = await fetch('/api/call/speak', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callId: currentCallId, spokenText })
+      });
+      const data = await res.json();
+      const resultBox = document.getElementById('callResultBox');
+      const resultText = document.getElementById('callResultText');
+      resultText.innerText = `${data.agentVerbalReply} (${data.actionsTaken.map(a => a.tool).join(', ')})`;
+      resultBox.classList.remove('hidden');
+      loadState();
+    };
+
+    document.getElementById('btnRefreshReport').onclick = loadPostMortem;
+
+    loadState();
+  </script>
+</body>
+</html>

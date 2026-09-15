@@ -2,8 +2,9 @@ import assert from 'assert';
 import { IncidentTriageEngine } from '../src/incident_triage.js';
 import { ChimeVoiceOrchestrator } from '../src/chime_voice_orchestrator.js';
 import { MessagingGateway } from '../src/messaging_gateway.js';
+import { A2AMessageBus, TriageSupervisorAgent, DevOpsRemediationAgent, IncidentReporterAgent } from '../src/a2a_orchestrator.js';
 
-console.log('🧪 Starting DispatchAgent.AI Automated Verification Suite (AWS CDS Partner Hackathon)...\n');
+console.log('🧪 Starting DispatchAgent.AI Automated Verification Suite (AWS CDS Partner Hackathon 2026)...\n');
 
 const triage = new IncidentTriageEngine();
 const voice = new ChimeVoiceOrchestrator(triage);
@@ -63,8 +64,32 @@ console.log('5️⃣ Verifying Incident Action Audit Trail...');
 const updatedIncident = triage.getIncident(incident.id);
 assert(updatedIncident.actionLog.length >= 5, 'Must contain full timeline events');
 console.log(`   📋 Incident Audit Log (${updatedIncident.actionLog.length} events logged):`);
-for (const log of updatedIncident.actionLog) {
-  console.log(`      [${log.timestamp.split('T')[1].split('.')[0]}] ${log.message}`);
-}
 
-console.log('\n🎉 ALL DISPATCHAGENT.AI & AWS CDS TESTS PASSED WITH 100% SUCCESS!\n');
+// Test 6: AWS Strands A2A Protocol & Multi-Agent Swarm
+console.log('6️⃣ Testing AWS Strands A2A Multi-Agent Protocol...');
+const bus = new A2AMessageBus();
+const supervisor = new TriageSupervisorAgent(bus);
+const devops = new DevOpsRemediationAgent(bus);
+const reporter = new IncidentReporterAgent(bus);
+
+assert(supervisor.capabilities.includes('agent_delegation'), 'Supervisor must possess agent delegation');
+assert(devops.capabilities.includes('rollback_deployment'), 'DevOps agent must handle rollbacks');
+
+const plan = supervisor.evaluateAlert(incident);
+assert(plan.priority === 'P1_CRITICAL', 'Plan priority must be P1_CRITICAL');
+assert(plan.requiredAgents.length === 3, 'Must delegate to 3 specialized agents');
+console.log('   🤖 TriageSupervisorAgent evaluated alert & dispatched A2A packet');
+
+// Test 7: A2A Inter-Agent Execution & Post-Mortem
+console.log('7️⃣ Testing A2A Remediation & Incident Post-Mortem Synthesis...');
+const devopsResult = devops.executeAction('trigger_rollback', { version: 'v2.4.1' });
+assert(devopsResult.status === 'SUCCESS', 'DevOps action must succeed');
+
+const postMortem = reporter.generateReport(incident, [devopsResult]);
+assert(postMortem.status === 'RESOLVED', 'Post-mortem status must be RESOLVED');
+assert(postMortem.postMortemMarkdown.includes('v2.4.1'), 'Post-mortem must detail version rolled back');
+console.log('   📄 Executive Post-Mortem Synthesized by IncidentReporterAgent:');
+console.log('   ', postMortem.title);
+console.log('   ', postMortem.timeToAcknowledge, '|', postMortem.timeToRemediate);
+
+console.log('\n🎉 ALL 7 DISPATCHAGENT.AI & AWS MULTI-AGENT A2A TESTS PASSED WITH 100% SUCCESS!\n');
