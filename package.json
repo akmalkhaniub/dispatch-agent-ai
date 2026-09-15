@@ -1,0 +1,26 @@
+{
+  "name": "dispatch-agent-ai",
+  "version": "1.0.0",
+  "description": "Autonomous Field Ops & Incident Commander via AWS Communication Developer Services",
+  "main": "src/incident_triage.js",
+  "type": "module",
+  "scripts": {
+    "test": "node test/verify_dispatch_agent.js",
+    "start": "node test/verify_dispatch_agent.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "aws-cds",
+    "chime-sdk",
+    "telephony",
+    "voice-agent",
+    "incident-response",
+    "pagerduty",
+    "agentic-ai"
+  ],
+  "author": "Antigravity Builder",
+  "license": "MIT"
+}
