@@ -5,8 +5,12 @@
   "main": "src/incident_triage.js",
   "type": "module",
   "scripts": {
+    "start": "node src/server.js",
     "test": "node test/verify_dispatch_agent.js",
-    "start": "node test/verify_dispatch_agent.js"
+    "docker:build": "docker build -t dispatch-agent-ai:latest .",
+    "docker:run": "docker run -d -p 3003:3003 --name dispatch-agent-ai dispatch-agent-ai:latest",
+    "docker:compose": "docker compose up -d",
+    "tunnel": "powershell -ExecutionPolicy Bypass -File deploy/free/tunnel.ps1"
   },
   "dependencies": {
     "dotenv": "^16.4.7"
