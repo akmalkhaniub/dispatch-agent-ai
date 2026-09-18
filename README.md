@@ -1,5 +1,6 @@
 # 🚨 DispatchAgent.AI — Autonomous AWS Telephony Voice & Strands A2A Incident Response
 
+[![TypeScript: strict](https://img.shields.io/badge/TypeScript-strict-3178c6.svg)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![AWS Strands: A2A Protocol](https://img.shields.io/badge/AWS%20Strands-A2A%20Protocol-orange.svg)](https://aws.amazon.com)
 [![AWS Chime: SIP Trunking](https://img.shields.io/badge/AWS%20Chime-Voice%20Connector-purple.svg)](https://aws.amazon.com/chime/)

@@ -1,6 +1,8 @@
 # Technical Specification: DispatchAgent.AI
 **Project Name:** DispatchAgent.AI (AWS CDS Agentic AI Partner Hackathon)  
-**Status:** Ready for Implementation  
+**Status:** Prototype implemented — spec is target design (updated 2026-09-18)  
+
+> **Implementation status (2026-09-18):** The sections below describe the *target* architecture. Built: a Node.js A2A orchestrator, incident triage engine, mock Chime voice orchestrator, and mock messaging gateway with deterministic tool calls (511 LOC, 7 passing tests). Not yet built: real AWS Chime SDK/SIP telephony, the audio/transcription bridge, live AWS End User Messaging (SMS/WhatsApp), and the Next.js incident room (currently static HTML).
 **Version:** 1.0.0  
 
 ---

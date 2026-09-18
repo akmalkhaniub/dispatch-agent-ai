@@ -2,20 +2,25 @@
   "name": "dispatch-agent-ai",
   "version": "1.0.0",
   "description": "Autonomous Field Ops & Incident Commander via AWS Communication Developer Services",
-  "main": "src/incident_triage.js",
+  "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "start": "node src/server.js",
-    "test": "node test/verify_dispatch_agent.js",
+    "start": "node dist/server.js",
+    "test": "npm run typecheck && tsx test/verify_dispatch_agent.ts && tsx test/server_integration.ts",
     "docker:build": "docker build -t dispatch-agent-ai:latest .",
     "docker:run": "docker run -d -p 3003:3003 --name dispatch-agent-ai dispatch-agent-ai:latest",
     "docker:compose": "docker compose up -d",
-    "tunnel": "powershell -ExecutionPolicy Bypass -File deploy/free/tunnel.ps1"
+    "tunnel": "powershell -ExecutionPolicy Bypass -File deploy/free/tunnel.ps1",
+    "build": "tsc && node scripts/copy-public.mjs",
+    "typecheck": "tsc -p tsconfig.test.json",
+    "dev": "tsx watch src/server.ts",
+    "test:unit": "tsx test/verify_dispatch_agent.ts",
+    "test:integration": "tsx test/server_integration.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.1135.0",
     "dotenv": "^16.4.7"
   },
-  "devDependencies": {},
   "keywords": [
     "aws-cds",
     "chime-sdk",
@@ -26,5 +31,13 @@
     "agentic-ai"
   ],
   "author": "Antigravity Builder",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
