@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node dist/server.js",
-    "test": "npm run typecheck && tsx test/verify_dispatch_agent.ts && tsx test/server_integration.ts",
+    "test": "npm run typecheck && tsx test/verify_dispatch_agent.ts && tsx test/eval.test.ts && tsx test/server_integration.ts",
     "docker:build": "docker build -t dispatch-agent-ai:latest .",
     "docker:run": "docker run -d -p 3003:3003 --name dispatch-agent-ai dispatch-agent-ai:latest",
     "docker:compose": "docker compose up -d",
@@ -15,7 +15,8 @@
     "typecheck": "tsc -p tsconfig.test.json",
     "dev": "tsx watch src/server.ts",
     "test:unit": "tsx test/verify_dispatch_agent.ts",
-    "test:integration": "tsx test/server_integration.ts"
+    "test:integration": "tsx test/server_integration.ts",
+    "test:eval": "tsx test/eval.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-sns": "^3.1135.0",

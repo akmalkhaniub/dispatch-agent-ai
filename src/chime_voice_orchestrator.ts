@@ -70,7 +70,8 @@ export class ChimeVoiceOrchestrator {
     const actionsTaken: SpokenResult['actionsTaken'] = [];
     let agentVerbalReply = '';
 
-    if (lower.includes('acknowledge') || lower.includes('ack') || lower.includes('got it')) {
+    // Word-boundary match so "roll back" does not falsely match the token "ack".
+    if (/\backnowledge\b/.test(lower) || /\back\b/.test(lower) || lower.includes('got it')) {
       this.triage.updateState(call.incidentId, 'ACKNOWLEDGED');
       actionsTaken.push({ tool: 'acknowledge_incident', status: 'SUCCESS' });
       agentVerbalReply += `Incident acknowledged by ${call.recipient}. `;
