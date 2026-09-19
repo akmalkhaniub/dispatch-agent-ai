@@ -7,3 +7,6 @@ build/
 coverage/
 
 *.tsbuildinfo
+
+coverage/
+.nyc_output/
