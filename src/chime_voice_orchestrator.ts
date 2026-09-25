@@ -70,6 +70,7 @@ export class ChimeVoiceOrchestrator {
     const actionsTaken: SpokenResult['actionsTaken'] = [];
     let agentVerbalReply = '';
 
+    // Heuristic keyword classifier. This is not an Amazon Bedrock call.
     // Word-boundary match so "roll back" does not falsely match the token "ack".
     if (/\backnowledge\b/.test(lower) || /\back\b/.test(lower) || lower.includes('got it')) {
       this.triage.updateState(call.incidentId, 'ACKNOWLEDGED');

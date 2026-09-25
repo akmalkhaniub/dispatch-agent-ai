@@ -134,7 +134,7 @@ node test/verify_dispatch_agent.js
 7️⃣ Testing A2A Remediation & Incident Post-Mortem Synthesis...
    📄 Executive Post-Mortem Synthesized by IncidentReporterAgent:
     [POST-MORTEM] Incident inc_1789510870819 - checkout-payment-api
-    18 seconds (Automated Chime Voice Agent) | 4 minutes 12 seconds
+    not measured (voice and rollback are simulated) | not measured
 
 🎉 ALL 7 DISPATCHAGENT.AI & AWS MULTI-AGENT A2A TESTS PASSED WITH 100% SUCCESS!
 ```

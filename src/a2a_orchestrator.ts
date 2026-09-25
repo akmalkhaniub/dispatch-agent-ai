@@ -97,8 +97,8 @@ export class IncidentReporterAgent {
       title: `[POST-MORTEM] Incident ${incident.id || 'INC-1042'} - ${incident.serviceName || 'checkout-payment-api'}`,
       status: 'RESOLVED',
       rootCause: incident.metricViolation || 'Upstream service failure',
-      timeToAcknowledge: '18 seconds (Automated Chime Voice Agent)',
-      timeToRemediate: '4 minutes 12 seconds',
+      timeToAcknowledge: 'not measured — voice leg is simulated',
+      timeToRemediate: 'not measured — rollback is simulated',
       remediations: remediationLogs,
       postMortemMarkdown: `
 # Executive Incident Report: ${incident.serviceName}
