@@ -22,6 +22,18 @@ DispatchAgent.AI replaces sluggish on-call alerting apps with an autonomous conv
 
 ---
 
+## ✅ Verified engineering metrics (reproducible)
+
+| What | Evidence | How to check |
+| :--- | :--- | :--- |
+| Spoken-command → action **accuracy 1.0** on a labeled command set (caught & fixed a real bug: "roll b**ack**" falsely matched "ack") | `src/eval.ts` + `test/eval.test.ts` | `npm run test:eval` |
+| Real **AWS SNS** SMS dispatch (simulator fallback without creds) | `src/messaging_gateway.ts` | set AWS creds, run |
+| AWS Strands **A2A** multi-agent orchestration (Supervisor → Telephony → DevOps → Reporter) | `src/a2a_orchestrator.ts` | `npm test` (7 unit) |
+| Server integration suite driving the real HTTP loop | `test/server_integration.ts` | `npm run test:integration` (10) |
+| TypeScript strict, **96% coverage**, CI on Node 18/20/22 | `.c8rc.json`, `ci/ci.workflow.yml` | `npm run coverage` |
+
+> Honesty note: outbound PSTN dialing via the AWS Chime SDK Voice Connector needs provisioned SIP media and is simulated; the command-interpretation, A2A orchestration, and SNS SMS paths are real (SMS falls back to a deterministic simulator without AWS credentials). No deployed endpoint.
+
 ## 🔍 Inspiration
 When a mission-critical payment or microservice outage occurs in the middle of the night, traditional incident tooling fails miserably. Push notifications get silenced by Do Not Disturb modes. Once awake, an engineer faces excruciating operational friction: opening a laptop, waiting for VPN tunnels to connect, authenticating via SSO, and navigating complex AWS consoles—adding 15 to 30 minutes of unnecessary downtime costing \$300,000/hour.
 
