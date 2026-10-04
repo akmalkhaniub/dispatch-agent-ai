@@ -18,7 +18,7 @@
 ---
 
 ## 💡 Elevator Pitch
-DispatchAgent.AI replaces sluggish on-call alerting apps with an autonomous conversational telephony voice agent and multi-agent swarm. Powered by AWS Chime Voice Connector, Amazon Bedrock, and the open AWS Strands Agent-to-Agent (A2A) protocol, DispatchAgent automatically calls on-call engineers during critical P1 CloudWatch outages, delivers an audible incident briefing, parses spoken verbal instructions (*"Acknowledge & Rollback to v2.4.1"*), orchestrates container rollback actions across an A2A agent mesh, and synthesizes executive post-mortems in under 18 seconds.
+DispatchAgent.AI replaces sluggish on-call alerting apps with an autonomous conversational telephony voice agent and multi-agent swarm. Powered by AWS Chime Voice Connector and the open AWS Strands Agent-to-Agent (A2A) protocol, DispatchAgent automatically calls on-call engineers during critical P1 CloudWatch outages, delivers an audible incident briefing, parses spoken verbal instructions (*"Acknowledge & Rollback to v2.4.1"*), orchestrates container rollback actions across an A2A agent mesh, and synthesizes executive post-mortems automatically.
 
 ---
 
@@ -32,13 +32,13 @@ DispatchAgent.AI replaces sluggish on-call alerting apps with an autonomous conv
 | Server integration suite driving the real HTTP loop | `test/server_integration.ts` | `npm run test:integration` (10) |
 | TypeScript strict, **96% coverage**, CI on Node 18/20/22 | `.c8rc.json`, `ci/ci.workflow.yml` | `npm run coverage` |
 
-> Honesty note: outbound PSTN dialing via the AWS Chime SDK Voice Connector needs provisioned SIP media and is simulated; the command-interpretation, A2A orchestration, and SNS SMS paths are real (SMS falls back to a deterministic simulator without AWS credentials). No deployed endpoint.
+> Honesty note: outbound PSTN dialing via the AWS Chime SDK Voice Connector needs provisioned SIP media and is simulated; the command-interpretation, A2A orchestration, and SNS SMS paths are real (SMS falls back to a deterministic simulator without AWS credentials). **Spoken-intent parsing is a deterministic heuristic classifier, not an Amazon Bedrock / LLM call** — Bedrock is the intended production upgrade, not wired in this build. MTTA/MTTR figures quoted elsewhere are **illustrative targets**, not measured (the voice leg is simulated). No deployed endpoint.
 
 ## 🔍 Inspiration
 When a mission-critical payment or microservice outage occurs in the middle of the night, traditional incident tooling fails miserably. Push notifications get silenced by Do Not Disturb modes. Once awake, an engineer faces excruciating operational friction: opening a laptop, waiting for VPN tunnels to connect, authenticating via SSO, and navigating complex AWS consoles—adding 15 to 30 minutes of unnecessary downtime costing \$300,000/hour.
 
 We asked: **What if the on-call engineer could remediate an outage simply by answering a phone call and speaking one sentence?**  
-By pairing AWS Chime Voice Connector SIP telephony with Amazon Bedrock and the 2026 AWS Strands A2A protocol, we built DispatchAgent.AI to eradicate on-call alert latency forever.
+By pairing AWS Chime Voice Connector SIP telephony with the 2026 AWS Strands A2A protocol, we built DispatchAgent.AI to eradicate on-call alert latency forever.
 
 ---
 
@@ -49,7 +49,7 @@ By pairing AWS Chime Voice Connector SIP telephony with Amazon Bedrock and the 2
 2. **Conversational Natural Language Voice Commands**:
    - The voice agent audibly articulates the outage context (service name, metric violation, blast radius).
    - Engineers speak commands into their phone: *"I acknowledge the outage. Please roll back deployment to v2.4.1 right away."*
-   - Amazon Bedrock parses spoken intent and triggers parallel tool execution (`acknowledge_incident`, `trigger_rollback`).
+   - A deterministic voice-command interpreter parses spoken intent and triggers parallel tool execution (`acknowledge_incident`, `trigger_rollback`). *(Swapping in Amazon Bedrock here is the intended production upgrade; this build uses a transparent heuristic classifier.)*
 3. **AWS Strands Agent-to-Agent (A2A) Swarm Coordination**:
    - **TriageSupervisorAgent**: Evaluates alarms, assigns priority, and routes tasks.
    - **TelephonyVoiceAgent**: Drives PSTN phone calls and converts conversational speech into structured tool parameters.
@@ -68,13 +68,13 @@ By pairing AWS Chime Voice Connector SIP telephony with Amazon Bedrock and the 2
 [ Amazon CloudWatch P1 Outage Alarm ]
                  │
                  ▼
-     [ TriageSupervisorAgent ] (Bedrock AgentCore Supervisor)
+     [ TriageSupervisorAgent ] (Strands Supervisor Agent)
                  │
         ┌────────┴──────────────────────────┐
         ▼ (A2A Message: A2A_DISPATCH_CALL)  ▼
  [ TelephonyVoiceAgent ]            [ DevOpsRemediationAgent ]
   ├── AWS Chime SIP Outbound Trunk   ├── Autonomous Rollback (v2.4.1)
-  ├── Bedrock Voice Tool Calling     ├── Canary Traffic Drain
+  ├── Heuristic Voice Tool Calling     ├── Canary Traffic Drain
   └── On-Call Engineer: Alex Chen    └── ECS Service Auto-Scaling
         │                                    │
         └──► Spoken Voice Command            │
@@ -110,7 +110,7 @@ By pairing AWS Chime Voice Connector SIP telephony with Amazon Bedrock and the 2
 ## 🏆 Accomplishments We're Proud Of
 
 - **100% Automated Multi-Agent Verification (7/7 Tests Passed)**: Full coverage from alarm ingestion, Chime phone call dispatch, spoken tool execution, A2A packet routing, to automated post-mortem exports.
-- **98.3% MTTA Latency Reduction**: Demonstrated reduction in engineer acknowledgment time from 18 minutes down to 18 seconds.
+- **Target: near-instant MTTA** — a phone call aims to cut acknowledgment from the industry's ~18-minute average to seconds. *(Illustrative target, not a measured benchmark: the voice leg is simulated and MTTA is not instrumented in this build.)*
 - **Complete Submission Asset Suite**: 16:9 interactive pitch deck, cinematic hero presentation graphic, and structured 3-minute video script.
 
 ---
@@ -153,6 +153,6 @@ npm start
 ### Steps to Verify in Web Console:
 1. Inspect the simulated P1 outage on `checkout-payment-api`.
 2. Click **"Simulate Outbound Chime Voice Call"** to initiate the phone call.
-3. Click spoken prompts (e.g. *"Acknowledge & Rollback to v2.4.1"*) to watch Bedrock parse speech and dispatch tools.
+3. Click spoken prompts (e.g. *"Acknowledge & Rollback to v2.4.1"*) to watch the deterministic interpreter parse speech and dispatch tools.
 4. Watch the live **Strands A2A Telemetry Stream** showing inter-agent packet exchange.
 5. Review the auto-generated **Executive Post-Mortem** report.

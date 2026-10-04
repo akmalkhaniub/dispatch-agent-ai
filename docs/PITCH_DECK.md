@@ -81,7 +81,7 @@
 ---
 
 ## Slide 6: Incident Lifecycle & Quantifiable Impact
-### **Slashing MTTA & MTTR by 98%**
+### **Targeting near-instant MTTA & MTTR** _(illustrative targets, not measured — voice leg simulated)_
 
 | Lifecycle Stage | Traditional Pager System | DispatchAgent.AI Voice + Swarm | Efficiency Gain |
 | :--- | :--- | :--- | :--- |

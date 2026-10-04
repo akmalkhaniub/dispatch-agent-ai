@@ -74,13 +74,15 @@ export class DevOpsRemediationAgent {
   constructor(private bus: A2AMessageBus) {}
 
   executeAction(actionName: string, params: Record<string, any> = {}): Record<string, unknown> {
+    // Actions are SIMULATED (no live ECS/deploy here), so we flag them and do not
+    // report fabricated execution timings.
     let result: Record<string, unknown>;
     if (actionName === 'trigger_rollback') {
-      result = { action: 'trigger_rollback', targetVersion: params.version || 'v2.4.1', status: 'SUCCESS', deploymentId: 'dpl_' + Math.random().toString(36).substring(2, 8), durationMs: 1420 };
+      result = { action: 'trigger_rollback', targetVersion: params.version || 'previous stable release', status: 'SUCCESS', deploymentId: 'dpl_' + Math.random().toString(36).substring(2, 8), simulated: true };
     } else if (actionName === 'drain_canary') {
-      result = { action: 'drain_canary', weight: 0, status: 'TRAFFIC_DIVERTED', durationMs: 380 };
+      result = { action: 'drain_canary', weight: 0, status: 'TRAFFIC_DIVERTED', simulated: true };
     } else {
-      result = { action: actionName, status: 'COMPLETED' };
+      result = { action: actionName, status: 'COMPLETED', simulated: true };
     }
     this.bus.dispatch({ sender: this.name, recipient: 'IncidentReporterAgent', type: 'A2A_REMEDIATION_LOG', payload: result });
     return result;
@@ -93,6 +95,10 @@ export class IncidentReporterAgent {
   constructor(private bus: A2AMessageBus) {}
 
   generateReport(incident: Partial<Incident>, remediationLogs: unknown[] = []): Record<string, unknown> {
+    // Derive the rolled-back version from the actual remediation log (if any).
+    const rollback = (remediationLogs as Array<Record<string, unknown>>).find((l) => l && l.action === 'trigger_rollback');
+    const version = (rollback?.targetVersion as string) || 'the previous stable release';
+    const actions = (remediationLogs as Array<Record<string, unknown>>).map((l) => String(l.action)).filter(Boolean);
     return {
       title: `[POST-MORTEM] Incident ${incident.id || 'INC-1042'} - ${incident.serviceName || 'checkout-payment-api'}`,
       status: 'RESOLVED',
@@ -101,14 +107,14 @@ export class IncidentReporterAgent {
       timeToRemediate: 'not measured — rollback is simulated',
       remediations: remediationLogs,
       postMortemMarkdown: `
-# Executive Incident Report: ${incident.serviceName}
+# Executive Incident Report: ${incident.serviceName || 'checkout-payment-api'}
 **Severity**: ${incident.severity || 'P1'} | **Status**: Resolved
 - **Detection**: CloudWatch Alarm triggered at ${new Date().toISOString()}
 - **A2A Orchestration**: TriageSupervisor -> TelephonyVoiceAgent -> DevOpsRemediationAgent
-- **Actions Executed**:
-  - Outbound Chime Voice Call connected with engineer on-call
-  - Verbal instruction processed via Bedrock Converse: deployment roll back
-  - Target version \`v2.4.1\` deployed with 0 dropped transactions
+- **Actions executed (simulated)**: ${actions.length ? actions.join(', ') : 'none recorded'}
+  - Outbound Chime voice call connected with the on-call engineer (simulated SIP leg)
+  - Spoken instruction classified by the heuristic voice-command interpreter (not an LLM call)
+  - Deployment rollback to \`${version}\` executed (simulated — no live ECS deploy)
       `.trim()
     };
   }
