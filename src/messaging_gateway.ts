@@ -23,7 +23,8 @@ export class MessagingGateway {
   private isMock: boolean;
 
   constructor(private triage: IncidentTriageEngine, options: { isMock?: boolean } = {}) {
-    this.isMock = options.isMock ?? (!process.env.AWS_ACCESS_KEY_ID || process.env.MOCK_SNS === 'true');
+    const hasAwsEnv = Boolean(process.env.AWS_ACCESS_KEY_ID || process.env.AWS_PROFILE || process.env.LIVE_AWS === 'true');
+    this.isMock = options.isMock ?? (process.env.MOCK_SNS === 'true' ? true : !hasAwsEnv);
   }
 
   /** Dispatch an urgent SMS with an action deep-link. */
