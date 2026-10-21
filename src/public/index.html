@@ -1,209 +1,676 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DispatchAgent.AI — AWS Strands Multi-Agent Emergency Response</title>
+  <title>DispatchAgent.AI — Autonomous Emergency Incident Commander</title>
+  
+  <!-- Inter & JetBrains Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS & Font Awesome -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-rose-500 selection:text-white">
+  
+  <!-- Marked for Markdown Rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-  <!-- Header -->
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Theme color variables */
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+    }
+    html.dark {
+      --bg-page: #090d16;
+      --bg-card: #111827;
+      --bg-subtle: #1e293b;
+      --border-color: #1f2937;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Audio wave animation */
+    @keyframes soundwave {
+      0%, 100% { height: 6px; }
+      50% { height: 24px; }
+    }
+    .wave-bar {
+      animation: soundwave 1.2s ease-in-out infinite;
+    }
+    .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.6s; }
+
+    /* Custom prose styles for reports */
+    .prose-custom h1 { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.75rem; color: var(--text-main); }
+    .prose-custom h2 { font-size: 1.05rem; font-weight: 700; margin-top: 1rem; margin-bottom: 0.5rem; color: var(--text-main); }
+    .prose-custom p { margin-bottom: 0.5rem; line-height: 1.6; }
+    .prose-custom ul { list-style-type: disc; margin-left: 1.25rem; margin-bottom: 0.75rem; }
+    .prose-custom li { margin-bottom: 0.25rem; }
+    .prose-custom code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; padding: 0.15rem 0.35rem; border-radius: 0.25rem; background: var(--bg-subtle); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col transition-colors duration-200">
+
+  <!-- Navigation Bar -->
+  <header class="border-b border-[var(--border-color)] bg-[var(--bg-card)]/90 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Domain Label -->
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-slate-950 shadow-lg shadow-rose-500/20">
-          <i class="fa-solid fa-tower-broadcast text-lg font-black"></i>
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 via-rose-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-rose-500/20">
+          <i class="fa-solid fa-tower-broadcast text-lg"></i>
         </div>
         <div>
           <div class="flex items-center space-x-2">
-            <span class="font-extrabold text-lg tracking-tight">DispatchAgent.AI</span>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40">AWS CDS 2026</span>
+            <span class="font-extrabold text-lg tracking-tight">DispatchAgent<span class="text-rose-500">.AI</span></span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-500 border border-rose-500/30">AWS CDS 2026</span>
           </div>
-          <p class="text-xs text-slate-400">Autonomous Telephony Outbound Voice & Strands A2A Swarm</p>
+          <p class="text-xs text-[var(--text-muted)] hidden sm:block">Autonomous Emergency Telephony & Multi-Agent Incident Commander</p>
         </div>
       </div>
 
+      <!-- Center Nav Tabs -->
+      <nav class="hidden md:flex items-center p-1 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] text-xs font-semibold">
+        <button onclick="switchTab('commander')" id="tabBtn-commander" class="tab-btn px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-2 bg-[var(--bg-card)] text-rose-500 shadow-sm">
+          <i class="fa-solid fa-phone-volume"></i>
+          <span>Incident Commander</span>
+        </button>
+        <button onclick="switchTab('topology')" id="tabBtn-topology" class="tab-btn px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-2 text-[var(--text-muted)] hover:text-[var(--text-main)]">
+          <i class="fa-solid fa-network-wired"></i>
+          <span>A2A Swarm Topology</span>
+        </button>
+        <button onclick="switchTab('sms')" id="tabBtn-sms" class="tab-btn px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-2 text-[var(--text-muted)] hover:text-[var(--text-main)]">
+          <i class="fa-solid fa-comment-sms"></i>
+          <span>SMS Gateway</span>
+        </button>
+        <button onclick="switchTab('postmortem')" id="tabBtn-postmortem" class="tab-btn px-3.5 py-1.5 rounded-lg transition-all flex items-center space-x-2 text-[var(--text-muted)] hover:text-[var(--text-main)]">
+          <i class="fa-solid fa-file-shield"></i>
+          <span>Post-Mortem</span>
+        </button>
+      </nav>
+
+      <!-- Right Controls: Status & Theme Toggle -->
       <div class="flex items-center space-x-3">
-        <span class="inline-flex items-center space-x-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-          <span>A2A Swarm Live</span>
-        </span>
+        <div class="hidden sm:inline-flex items-center space-x-2 text-xs font-medium px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>AWS Telephony Live</span>
+        </div>
+
+        <button id="themeToggleBtn" onclick="toggleTheme()" title="Switch Light/Dark Theme" class="w-9 h-9 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] hover:text-[var(--text-main)] transition flex items-center justify-center">
+          <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+        </button>
       </div>
+
+    </div>
+
+    <!-- Mobile Navigation Sub-bar -->
+    <div class="md:hidden flex overflow-x-auto px-4 py-2 border-t border-[var(--border-color)] bg-[var(--bg-subtle)] space-x-2 text-xs">
+      <button onclick="switchTab('commander')" class="px-3 py-1 rounded-lg bg-[var(--bg-card)] font-semibold text-rose-500 shrink-0">Commander</button>
+      <button onclick="switchTab('topology')" class="px-3 py-1 rounded-lg text-[var(--text-muted)] shrink-0">A2A Swarm</button>
+      <button onclick="switchTab('sms')" class="px-3 py-1 rounded-lg text-[var(--text-muted)] shrink-0">SMS Gateway</button>
+      <button onclick="switchTab('postmortem')" class="px-3 py-1 rounded-lg text-[var(--text-muted)] shrink-0">Post-Mortem</button>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-    <!-- Left: Incident Feed & Action Console (7 cols) -->
-    <div class="lg:col-span-7 space-y-6">
-
-      <!-- Active Incident Card -->
-      <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-black uppercase px-2.5 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/40">
-            CRITICAL • P1 OUTAGE
-          </span>
-          <span class="text-xs font-mono text-slate-400" id="incIdDisplay">INC-1042</span>
-        </div>
-
-        <div>
-          <h2 class="text-xl font-black text-white" id="serviceNameDisplay">checkout-payment-api</h2>
-          <p class="text-xs text-rose-300 font-mono mt-1" id="metricDisplay">HTTP 500 error rate spiked to 14.8% (threshold: 1.0%)</p>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs">
-          <div>
-            <span class="text-slate-500 text-[11px]">Primary On-Call</span>
-            <div class="font-bold text-slate-200">Alex Chen (+1-555-0199)</div>
+    <!-- ========================================== -->
+    <!-- TAB 1: INCIDENT COMMANDER (HERO WORKSPACE) -->
+    <!-- ========================================== -->
+    <section id="tab-commander" class="tab-pane space-y-6">
+      
+      <!-- Top Grid: Active Alert & On-Call Responder -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Active Incident Banner (7 cols) -->
+        <div class="lg:col-span-7 p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="inline-flex items-center space-x-1.5 text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/30">
+                <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                <span>P1 Critical Outage</span>
+              </span>
+              <span id="incStatusBadge" class="text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                DISPATCHING
+              </span>
+            </div>
+            <span class="text-xs font-mono text-[var(--text-muted)]" id="incIdDisplay">INC-1042</span>
           </div>
+
           <div>
-            <span class="text-slate-500 text-[11px]">Dispatch Status</span>
-            <div class="font-bold text-amber-400" id="incStatusDisplay">DISPATCHING</div>
+            <div class="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Affected Service</div>
+            <h2 class="text-2xl font-extrabold tracking-tight mt-0.5" id="serviceNameDisplay">checkout-payment-api</h2>
+            <div class="mt-2 p-3 rounded-xl bg-rose-500/5 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-mono flex items-center space-x-2">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span id="metricDisplay">HTTP 500 error rate spiked to 14.8% (threshold: 1.0%)</span>
+            </div>
+          </div>
+
+          <!-- Scenario Simulator Switcher -->
+          <div class="pt-2 border-t border-[var(--border-color)]">
+            <span class="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider block mb-2">Simulate Outage Scenarios:</span>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="injectAlert('checkout-payment-api', 'P1', 'HTTP 500 error rate spiked to 14.8% (threshold: 1.0%)')" class="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border-color)] hover:border-rose-500/50 hover:bg-rose-500/5 transition">
+                ⚡ Checkout 500 Spike
+              </button>
+              <button onclick="injectAlert('order-fulfillment-db', 'P1', 'Postgres active connection pool exhausted (98% capacity)')" class="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border-color)] hover:border-rose-500/50 hover:bg-rose-500/5 transition">
+                🗄️ RDS Pool Exhaustion
+              </button>
+              <button onclick="injectAlert('auth-gateway-svc', 'P2', 'P99 OAuth token verification latency degraded to 4,200ms')" class="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border-color)] hover:border-rose-500/50 hover:bg-rose-500/5 transition">
+                ⏱️ Auth Latency Spike
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Telephony Controls -->
-        <div class="pt-2 flex items-center space-x-3">
-          <button id="btnDialCall" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:opacity-90 text-slate-950 font-black text-xs shadow-lg shadow-rose-500/20 transition flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-phone-volume"></i>
-            <span>Simulate Outbound Chime Voice Call</span>
-          </button>
+        <!-- Responder & Telephony Dispatch Card (5 cols) -->
+        <div class="lg:col-span-5 p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm space-y-4 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Primary On-Call Responder</span>
+              <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check mr-1"></i>Available</span>
+            </div>
+            
+            <div class="flex items-center space-x-3 p-3 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)]">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 text-white font-bold text-sm flex items-center justify-center">
+                AC
+              </div>
+              <div class="flex-1">
+                <div class="font-bold text-sm" id="responderName">Alex Chen</div>
+                <div class="text-xs font-mono text-[var(--text-muted)]" id="responderPhone">+1-555-0199</div>
+              </div>
+              <span class="text-[10px] font-semibold px-2 py-1 rounded bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-muted)]">
+                Primary Tier-1
+              </span>
+            </div>
+
+            <p class="text-xs text-[var(--text-muted)] leading-relaxed">
+              When an outage triggers, DispatchAgent initiates an automated high-priority PSTN voice call via AWS Chime Voice Connector to capture responder voice intent.
+            </p>
+          </div>
+
+          <!-- Dispatch Action Buttons -->
+          <div class="pt-3 border-t border-[var(--border-color)] space-y-2">
+            <button id="btnDialCall" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold text-xs shadow-md shadow-rose-500/20 active:scale-[0.99] transition flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-phone-volume"></i>
+              <span>Initiate Outbound Chime Voice Call</span>
+            </button>
+            <button onclick="triggerSms()" class="w-full py-2 px-3 rounded-xl border border-[var(--border-color)] hover:bg-[var(--bg-subtle)] text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] transition flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-paper-plane text-rose-500"></i>
+              <span>Dispatch Fallback SMS Deep-Link</span>
+            </button>
+          </div>
         </div>
+
       </div>
 
-      <!-- Interactive Call Dialogue Box (Simulated Phone Call) -->
-      <div id="phoneCallBox" class="p-5 rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 border border-amber-500/40 hidden space-y-4 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+      <!-- ============================================== -->
+      <!-- INTERACTIVE VOICE TELEPHONY SIMULATOR (MODAL)  -->
+      <!-- ============================================== -->
+      <div id="phoneCallBox" class="p-6 rounded-2xl bg-[var(--bg-card)] border-2 border-rose-500/50 shadow-xl space-y-5 hidden transition-all">
+        
+        <!-- Call Header -->
+        <div class="flex items-center justify-between border-b border-[var(--border-color)] pb-4">
           <div class="flex items-center space-x-3">
-            <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-              <i class="fa-solid fa-phone text-sm"></i>
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+              <i class="fa-solid fa-phone text-lg animate-bounce"></i>
             </div>
             <div>
-              <h4 class="text-xs font-bold text-white">Call Connected: Alex Chen</h4>
-              <span class="text-[10px] text-emerald-400 font-mono">AWS Chime SIP Trunk • Low Latency</span>
+              <div class="flex items-center space-x-2">
+                <h4 class="text-sm font-bold">Call Connected: Alex Chen</h4>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/30">CONNECTED</span>
+              </div>
+              <span class="text-xs text-[var(--text-muted)] font-mono">AWS Chime Voice Connector • SIP Trunk 0001</span>
             </div>
           </div>
-          <span class="text-xs font-mono text-slate-400">00:18</span>
-        </div>
 
-        <!-- Agent Speech Bubble -->
-        <div class="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/60 text-xs leading-relaxed text-slate-200">
-          <strong class="text-amber-400">DispatchAgent:</strong>
-          <span id="agentPromptText">Hello Alex Chen. This is AWS DispatchAgent with a high-priority P1 alert on checkout-payment-api. Please state your instructions or say acknowledge.</span>
-        </div>
-
-        <!-- Quick Speech Prompts -->
-        <div class="space-y-2">
-          <span class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Voice Response Simulation (deterministic command interpreter + A2A tool calling):</span>
-          <div class="grid grid-cols-2 gap-2">
-            <button onclick="simulateSpeech('I acknowledge the outage. Please roll back deployment to v2.4.1 right away.')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-left text-xs text-slate-200 border border-slate-700 transition">
-              🗣️ "Acknowledge & Rollback to v2.4.1"
-            </button>
-            <button onclick="simulateSpeech('Acknowledge. Drain canary traffic and scale up ECS tasks by 50%.')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-left text-xs text-slate-200 border border-slate-700 transition">
-              🗣️ "Drain canary & scale ECS"
+          <!-- Soundwave and Timer -->
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-1 h-6 px-2">
+              <span class="w-1 bg-rose-500 rounded-full wave-bar"></span>
+              <span class="w-1 bg-amber-500 rounded-full wave-bar"></span>
+              <span class="w-1 bg-emerald-500 rounded-full wave-bar"></span>
+              <span class="w-1 bg-indigo-500 rounded-full wave-bar"></span>
+              <span class="w-1 bg-rose-500 rounded-full wave-bar"></span>
+            </div>
+            <span class="text-xs font-mono font-bold text-rose-500 bg-rose-500/10 px-2.5 py-1 rounded-md" id="callTimer">00:14</span>
+            <button onclick="hangUpCall()" class="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-semibold transition" title="Conclude Call">
+              <i class="fa-solid fa-phone-slash mr-1"></i> Hang Up
             </button>
           </div>
         </div>
 
-        <!-- Response result box -->
-        <div id="callResultBox" class="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/40 text-xs hidden space-y-1">
-          <strong class="text-emerald-400">Action Confirmed:</strong>
-          <p id="callResultText" class="text-slate-300"></p>
+        <!-- Agent Spoken Speech Bubble -->
+        <div class="p-4 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] flex items-start space-x-3">
+          <div class="w-8 h-8 rounded-lg bg-rose-500 text-white flex items-center justify-center text-xs shrink-0 mt-0.5">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-rose-600 dark:text-rose-400 mb-0.5">DispatchAgent (AWS Chime TTS):</div>
+            <p id="agentPromptText" class="text-xs text-[var(--text-main)] leading-relaxed">
+              Hello Alex Chen. This is AWS DispatchAgent with a high-priority P1 alert on checkout-payment-api. HTTP 500 error rate spiked to 14.8%. Please state your instructions or say acknowledge.
+            </p>
+          </div>
         </div>
+
+        <!-- Quick Responder Voice Chips -->
+        <div class="space-y-2">
+          <div class="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider flex items-center justify-between">
+            <span>Natural Spoken Command Simulation:</span>
+            <span class="text-[10px] text-[var(--text-muted)] font-mono">Real deterministic AST interpreter</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+            <button onclick="simulateSpeech('I acknowledge the outage. Please roll back deployment to v2.4.1 right away.')" class="p-3 rounded-xl bg-[var(--bg-subtle)] hover:border-rose-500/60 border border-[var(--border-color)] text-left text-xs transition space-y-1">
+              <div class="font-bold flex items-center space-x-1 text-rose-600 dark:text-rose-400">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Ack & Rollback to v2.4.1</span>
+              </div>
+              <p class="text-[11px] text-[var(--text-muted)]">Acknowledge incident & trigger automated rollback</p>
+            </button>
+
+            <button onclick="simulateSpeech('Acknowledge. Drain canary traffic and revert to previous stable release.')" class="p-3 rounded-xl bg-[var(--bg-subtle)] hover:border-amber-500/60 border border-[var(--border-color)] text-left text-xs transition space-y-1">
+              <div class="font-bold flex items-center space-x-1 text-amber-600 dark:text-amber-400">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+                <span>Drain Canary Traffic</span>
+              </div>
+              <p class="text-[11px] text-[var(--text-muted)]">Acknowledge & divert traffic off canary target</p>
+            </button>
+
+            <button onclick="simulateSpeech('I am not available right now. Please escalate to the secondary on-call engineer.')" class="p-3 rounded-xl bg-[var(--bg-subtle)] hover:border-purple-500/60 border border-[var(--border-color)] text-left text-xs transition space-y-1">
+              <div class="font-bold flex items-center space-x-1 text-purple-600 dark:text-purple-400">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Escalate to Secondary</span>
+              </div>
+              <p class="text-[11px] text-[var(--text-muted)]">Route call to Jordan Taylor (+1-555-0288)</p>
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom Speech Input -->
+        <div class="pt-2 flex items-center space-x-2">
+          <input type="text" id="customSpeechInput" placeholder="Or type/speak any emergency command (e.g. 'Ack and revert to v2.3.0 immediately')..." class="flex-1 px-4 py-2.5 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] text-xs text-[var(--text-main)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-rose-500/50">
+          <button onclick="submitCustomSpeech()" class="px-4 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs transition flex items-center space-x-1.5 shrink-0">
+            <i class="fa-solid fa-microphone"></i>
+            <span>Speak</span>
+          </button>
+        </div>
+
+        <!-- Call Execution Result Box -->
+        <div id="callResultBox" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs hidden space-y-2">
+          <div class="flex items-center space-x-2 text-emerald-600 dark:text-emerald-400 font-bold">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Multi-Agent Tool Actions Confirmed & Executed</span>
+          </div>
+          <div id="callResultActionBadges" class="flex flex-wrap gap-1.5">
+            <!-- Injected action badges -->
+          </div>
+          <p id="callResultText" class="text-xs text-[var(--text-main)] leading-relaxed"></p>
+        </div>
+
       </div>
 
-      <!-- Action Timeline -->
-      <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Incident Audit Log</h3>
-        <div id="actionTimeline" class="space-y-2 text-xs">
-          <!-- Injected via JS -->
-        </div>
-      </div>
-    </div>
+      <!-- ============================================== -->
+      <!-- COLLAPSIBLE ACCORDIONS: AUDIT & POST-MORTEM   -->
+      <!-- ============================================== -->
+      <div class="space-y-4">
+        
+        <!-- Accordion 1: Incident Action Audit Log -->
+        <details class="group rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] overflow-hidden shadow-sm" open>
+          <summary class="px-6 py-4 flex items-center justify-between cursor-pointer select-none font-bold text-xs uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-subtle)] transition">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-clock-rotate-left text-rose-500"></i>
+              <span>Live Incident Audit Trail</span>
+            </div>
+            <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200 group-open:rotate-180"></i>
+          </summary>
+          <div class="p-6 border-t border-[var(--border-color)] bg-[var(--bg-page)]/50">
+            <div id="actionTimeline" class="space-y-2 text-xs">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </details>
 
-    <!-- Right: Strands A2A Swarm Telemetry & Post-Mortem (5 cols) -->
-    <div class="lg:col-span-5 space-y-6">
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: A2A SWARM TOPOLOGY & PROTOCOL STREAM-->
+    <!-- ========================================== -->
+    <section id="tab-topology" class="tab-pane hidden space-y-6">
       
-      <!-- A2A Protocol Telemetry -->
-      <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
-            <i class="fa-solid fa-network-wired text-rose-400"></i>
-            <span>Strands A2A Protocol Stream</span>
-          </span>
-          <span class="text-[10px] font-mono text-slate-500">Agent-to-Agent</span>
+      <!-- Swarm Architecture Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        
+        <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center text-xs font-bold">01</div>
+          <h4 class="font-bold text-sm">Triage Supervisor</h4>
+          <p class="text-xs text-[var(--text-muted)] leading-relaxed">Ingests CloudWatch alarms, assesses blast radius, and issues delegation plans across the swarm.</p>
         </div>
 
-        <div id="a2aStream" class="space-y-2 font-mono text-[11px] max-h-72 overflow-y-auto">
-          <!-- Injected via JS -->
+        <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center text-xs font-bold">02</div>
+          <h4 class="font-bold text-sm">Telephony Voice Agent</h4>
+          <p class="text-xs text-[var(--text-muted)] leading-relaxed">Manages AWS Chime SIP connector call states and parses natural voice responder instructions.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-xs font-bold">03</div>
+          <h4 class="font-bold text-sm">DevOps Remediation</h4>
+          <p class="text-xs text-[var(--text-muted)] leading-relaxed">Executes automated rollback plans, ECS service restarts, and canary traffic drains.</p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center text-xs font-bold">04</div>
+          <h4 class="font-bold text-sm">Incident Reporter</h4>
+          <p class="text-xs text-[var(--text-muted)] leading-relaxed">Synthesizes timeline audits and executive markdown post-mortems for leadership review.</p>
+        </div>
+
+      </div>
+
+      <!-- Real-Time Protocol Message Stream -->
+      <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-4 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-network-wired text-rose-500"></i>
+            <h3 class="font-bold text-sm">Strands A2A Packet Stream</h3>
+          </div>
+          <span class="text-xs font-mono text-[var(--text-muted)]" id="a2aPacketCount">4 packets</span>
+        </div>
+
+        <div id="a2aStream" class="space-y-3 font-mono text-xs max-h-96 overflow-y-auto pr-1">
+          <!-- Dynamically populated with parsed cards -->
         </div>
       </div>
 
-      <!-- Automated Executive Post-Mortem -->
-      <div class="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
-            <i class="fa-solid fa-file-lines text-amber-400"></i>
-            <span>Executive Post-Mortem</span>
-          </h3>
-          <button id="btnRefreshReport" class="text-[11px] text-amber-400 hover:underline">Regenerate</button>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: SMS GATEWAY (AWS END USER MESSAGING)-->
+    <!-- ========================================== -->
+    <section id="tab-sms" class="tab-pane hidden space-y-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Controls & Dispatcher (6 cols) -->
+        <div class="lg:col-span-6 p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-4 shadow-sm">
+          <div>
+            <h3 class="font-bold text-base">AWS End User Messaging SMS Gateway</h3>
+            <p class="text-xs text-[var(--text-muted)] mt-1">Dispatches deep-link SMS alerts when voice calls go unanswered or as a redundant notification channel.</p>
+          </div>
+
+          <div class="space-y-3 pt-2">
+            <div>
+              <label class="block text-xs font-semibold text-[var(--text-muted)] mb-1 uppercase tracking-wider">Recipient Responder</label>
+              <select id="smsRecipientSelect" class="w-full px-3 py-2 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] text-xs text-[var(--text-main)]">
+                <option value="+1-555-0199">Alex Chen (+1-555-0199) • Primary Tier-1</option>
+                <option value="+1-555-0288">Jordan Taylor (+1-555-0288) • Secondary Tier-2</option>
+              </select>
+            </div>
+
+            <button onclick="triggerSmsFromTab()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:opacity-95 text-white font-bold text-xs shadow-md shadow-rose-500/20 transition flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>Send Urgent Emergency SMS</span>
+            </button>
+          </div>
+
+          <div id="smsFeedbackBox" class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-600 dark:text-emerald-400 hidden">
+            <!-- Feedback -->
+          </div>
         </div>
-        <div id="postMortemBox" class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800/80 text-xs text-slate-300 space-y-2 whitespace-pre-wrap font-sans leading-relaxed">
-          <!-- Post-mortem summary injected via JS -->
+
+        <!-- Phone Mockup Preview (6 cols) -->
+        <div class="lg:col-span-6 p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm flex flex-col items-center justify-center space-y-4">
+          <div class="w-full max-w-sm rounded-3xl p-4 bg-[var(--bg-subtle)] border border-[var(--border-color)] shadow-lg space-y-3">
+            <div class="flex items-center justify-between text-[11px] text-[var(--text-muted)] pb-2 border-b border-[var(--border-color)]">
+              <span>Messages • AWS Alert</span>
+              <span>Now</span>
+            </div>
+            
+            <div class="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs space-y-1.5">
+              <div class="font-bold text-rose-500 flex items-center space-x-1">
+                <i class="fa-solid fa-bell"></i>
+                <span>[AWS ALERT] P1 CRITICAL</span>
+              </div>
+              <p class="text-xs text-[var(--text-main)]" id="smsMockupBody">
+                [AWS ALERT] P1 on checkout-payment-api: HTTP 500 error rate spiked to 14.8%. Tap to ACK or Rollback: https://ops.dispatchagent.aws/ack/inc_demo?token=9x82
+              </p>
+            </div>
+          </div>
+          <span class="text-xs text-[var(--text-muted)]">Verified delivery via AWS SNS client (`@aws-sdk/client-sns`)</span>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: EXECUTIVE POST-MORTEM               -->
+    <!-- ========================================== -->
+    <section id="tab-postmortem" class="tab-pane hidden space-y-6">
+      
+      <div class="p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-4 shadow-sm">
+        <div class="flex items-center justify-between border-b border-[var(--border-color)] pb-4">
+          <div>
+            <h3 class="font-bold text-base flex items-center space-x-2">
+              <i class="fa-solid fa-file-shield text-amber-500"></i>
+              <span>Automated Executive Incident Post-Mortem</span>
+            </h3>
+            <p class="text-xs text-[var(--text-muted)] mt-0.5">Synthesized by IncidentReporterAgent based on executed telemetry & A2A timeline</p>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <button onclick="copyPostMortem()" class="px-3 py-1.5 rounded-lg border border-[var(--border-color)] hover:bg-[var(--bg-subtle)] text-xs font-semibold transition flex items-center space-x-1.5">
+              <i class="fa-solid fa-copy"></i>
+              <span>Copy Markdown</span>
+            </button>
+            <button onclick="loadPostMortem()" class="px-3 py-1.5 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 text-xs font-semibold transition flex items-center space-x-1.5">
+              <i class="fa-solid fa-rotate"></i>
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Rendered Post-Mortem Content -->
+        <div id="postMortemBox" class="prose-custom p-6 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] text-xs leading-relaxed">
+          <!-- Injected via marked.parse -->
         </div>
       </div>
 
-    </div>
+    </section>
+
   </main>
 
+  <!-- Footer -->
+  <footer class="border-t border-[var(--border-color)] bg-[var(--bg-card)] py-4 text-center text-xs text-[var(--text-muted)]">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>DispatchAgent.AI • AWS Communication Developer Services Partner Hackathon 2026</div>
+      <div class="flex items-center space-x-3">
+        <span>AWS Chime Voice</span>
+        <span>•</span>
+        <span>AWS End User Messaging</span>
+        <span>•</span>
+        <span>AWS Strands A2A Swarm</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
   <script>
     let currentCallId = null;
     let currentIncidentId = null;
+    let rawPostMortemMarkdown = '';
+    let callTimerInterval = null;
+    let callSeconds = 0;
 
+    // Theme Toggle Support
+    function initTheme() {
+      const stored = localStorage.getItem('theme');
+      if (stored === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('themeIcon').className = 'fa-solid fa-sun text-sm text-amber-500';
+      } else {
+        document.documentElement.classList.add('dark');
+        document.getElementById('themeIcon').className = 'fa-solid fa-moon text-sm text-slate-400';
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      document.getElementById('themeIcon').className = isDark 
+        ? 'fa-solid fa-moon text-sm text-slate-400' 
+        : 'fa-solid fa-sun text-sm text-amber-500';
+    }
+
+    // Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-[var(--bg-card)]', 'text-rose-500', 'shadow-sm');
+        btn.classList.add('text-[var(--text-muted)]');
+      });
+
+      const targetPane = document.getElementById(`tab-${tabId}`);
+      if (targetPane) targetPane.classList.remove('hidden');
+
+      const activeBtn = document.getElementById(`tabBtn-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-[var(--bg-card)]', 'text-rose-500', 'shadow-sm');
+        activeBtn.classList.remove('text-[var(--text-muted)]');
+      }
+
+      if (tabId === 'postmortem') loadPostMortem();
+    }
+
+    // Inject New Scenario Alert
+    async function injectAlert(serviceName, severity, metricViolation) {
+      const res = await fetch('/api/alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ serviceName, severity, metricViolation })
+      });
+      await loadState();
+    }
+
+    // Load Live Server State
     async function loadState() {
       const res = await fetch('/api/state');
       const data = await res.json();
 
-      if (data.incidents.length > 0) {
-        const inc = data.incidents[0];
+      if (data.incidents && data.incidents.length > 0) {
+        // Most recent incident
+        const inc = data.incidents[data.incidents.length - 1];
         currentIncidentId = inc.id;
         document.getElementById('incIdDisplay').innerText = inc.id;
-        document.getElementById('serviceNameDisplay').innerText = inc.serviceName;
-        document.getElementById('metricDisplay').innerText = inc.metricViolation;
-        document.getElementById('incStatusDisplay').innerText = inc.status;
+        document.getElementById('serviceNameDisplay').innerText = inc.serviceName || 'Unknown Service';
+        document.getElementById('metricDisplay').innerText = inc.metricViolation || 'No anomaly description';
+        document.getElementById('incStatusBadge').innerText = inc.status;
 
+        // Responder
+        if (inc.onCallSchedule) {
+          document.getElementById('responderName').innerText = inc.onCallSchedule.primaryName;
+          document.getElementById('responderPhone').innerText = inc.onCallSchedule.primaryPhone;
+        }
+
+        // Action Timeline
         const timeline = document.getElementById('actionTimeline');
-        timeline.innerHTML = inc.actionLog.map(l => `
-          <div class="p-2 rounded-xl bg-slate-950 border border-slate-800/80 flex items-center justify-between">
-            <span class="text-slate-300">${l.message}</span>
-            <span class="text-[10px] text-slate-500 font-mono">${l.timestamp.split('T')[1].split('.')[0]}</span>
+        timeline.innerHTML = (inc.actionLog || []).slice().reverse().map(l => `
+          <div class="p-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+              <span class="font-medium text-[var(--text-main)]">${l.message}</span>
+            </div>
+            <span class="text-[11px] text-[var(--text-muted)] font-mono shrink-0 ml-2">
+              ${l.timestamp ? l.timestamp.split('T')[1].split('.')[0] : ''}
+            </span>
           </div>
-        `).join('');
+        `).join('') || '<div class="text-[var(--text-muted)] text-center py-4">No audit actions logged yet.</div>';
       }
 
-      const a2aContainer = document.getElementById('a2aStream');
-      a2aContainer.innerHTML = data.a2aLogs.map(m => `
-        <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 space-y-1">
-          <div class="flex justify-between text-[10px]">
-            <span class="text-rose-400 font-bold">${m.sender} ➔ ${m.recipient}</span>
-            <span class="text-slate-500">${m.type}</span>
-          </div>
-          <div class="text-slate-400 text-[10px] truncate">${JSON.stringify(m.payload)}</div>
-        </div>
-      `).join('');
+      // A2A Protocol Stream
+      if (data.a2aLogs) {
+        document.getElementById('a2aPacketCount').innerText = `${data.a2aLogs.length} packets exchanged`;
+        const a2aContainer = document.getElementById('a2aStream');
+        a2aContainer.innerHTML = data.a2aLogs.slice().reverse().map(m => {
+          let summary = '';
+          if (m.type === 'A2A_DISPATCH_CALL') {
+            summary = `Dispatch outbound voice call to ${m.payload.onCallTarget || 'responder'} (${m.payload.phone})`;
+          } else if (m.type === 'A2A_REMEDIATION_LOG') {
+            summary = `Execute ${m.payload.action} to target ${m.payload.targetVersion || 'release'} (Status: ${m.payload.status})`;
+          } else {
+            summary = JSON.stringify(m.payload);
+          }
 
-      loadPostMortem();
+          return `
+            <div class="p-3.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] space-y-1.5 shadow-sm">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-rose-500 font-bold">${m.sender} ➔ ${m.recipient}</span>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-[var(--bg-subtle)] text-[var(--text-muted)] border border-[var(--border-color)]">${m.type}</span>
+              </div>
+              <p class="text-xs font-sans text-[var(--text-main)] font-medium">${summary}</p>
+              <details class="text-[10px] text-[var(--text-muted)]">
+                <summary class="cursor-pointer hover:underline">View raw JSON payload</summary>
+                <pre class="mt-1 p-2 rounded bg-[var(--bg-subtle)] overflow-x-auto text-[10px]">${JSON.stringify(m.payload, null, 2)}</pre>
+              </details>
+            </div>
+          `;
+        }).join('');
+      }
     }
 
+    // Post-Mortem Report Loading
     async function loadPostMortem() {
       const res = await fetch('/api/report');
       const report = await res.json();
-      document.getElementById('postMortemBox').innerText = report.postMortemMarkdown;
+      rawPostMortemMarkdown = report.postMortemMarkdown || '';
+      document.getElementById('postMortemBox').innerHTML = marked.parse(rawPostMortemMarkdown);
     }
 
+    function copyPostMortem() {
+      navigator.clipboard.writeText(rawPostMortemMarkdown);
+      alert('Executive Post-Mortem Markdown copied to clipboard!');
+    }
+
+    // Call Actions
     document.getElementById('btnDialCall').onclick = async () => {
       const res = await fetch('/api/call/initiate', {
         method: 'POST',
@@ -214,27 +681,98 @@
       currentCallId = data.call.callId;
       document.getElementById('agentPromptText').innerText = data.call.agentSpokenPrompt;
       document.getElementById('phoneCallBox').classList.remove('hidden');
+      
+      // Start call timer
+      callSeconds = 0;
+      clearInterval(callTimerInterval);
+      callTimerInterval = setInterval(() => {
+        callSeconds++;
+        const mins = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+        const secs = String(callSeconds % 60).padStart(2, '0');
+        document.getElementById('callTimer').innerText = `${mins}:${secs}`;
+      }, 1000);
+
       loadState();
     };
 
+    function hangUpCall() {
+      clearInterval(callTimerInterval);
+      document.getElementById('phoneCallBox').classList.add('hidden');
+    }
+
+    // Simulate Responder Speech
     window.simulateSpeech = async (spokenText) => {
-      if (!currentCallId) return;
+      if (!currentCallId) {
+        // Auto initiate if not yet connected
+        await document.getElementById('btnDialCall').onclick();
+      }
+      
       const res = await fetch('/api/call/speak', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ callId: currentCallId, spokenText })
       });
       const data = await res.json();
+
       const resultBox = document.getElementById('callResultBox');
       const resultText = document.getElementById('callResultText');
-      resultText.innerText = `${data.agentVerbalReply} (${data.actionsTaken.map(a => a.tool).join(', ')})`;
+      const badgesContainer = document.getElementById('callResultActionBadges');
+
+      resultText.innerText = data.agentVerbalReply;
+      badgesContainer.innerHTML = (data.actionsTaken || []).map(a => `
+        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40">
+          ✓ ${a.tool}${a.targetVersion ? ' -> ' + a.targetVersion : ''}
+        </span>
+      `).join('');
+
       resultBox.classList.remove('hidden');
       loadState();
     };
 
-    document.getElementById('btnRefreshReport').onclick = loadPostMortem;
+    function submitCustomSpeech() {
+      const input = document.getElementById('customSpeechInput');
+      const val = input.value.trim();
+      if (!val) return;
+      simulateSpeech(val);
+      input.value = '';
+    }
 
+    document.getElementById('customSpeechInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitCustomSpeech();
+    });
+
+    // SMS Dispatch
+    async function triggerSms() {
+      const recipientPhone = document.getElementById('responderPhone').innerText || '+1-555-0199';
+      const res = await fetch('/api/sms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ incidentId: currentIncidentId, recipientPhone })
+      });
+      const data = await res.json();
+      alert(`SMS successfully dispatched to ${data.recipientPhone} (Status: ${data.status})`);
+      loadState();
+    }
+
+    async function triggerSmsFromTab() {
+      const select = document.getElementById('smsRecipientSelect');
+      const recipientPhone = select.value;
+      const res = await fetch('/api/sms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ incidentId: currentIncidentId, recipientPhone })
+      });
+      const data = await res.json();
+      const fb = document.getElementById('smsFeedbackBox');
+      fb.innerHTML = `✓ SMS dispatched via <strong>${data.provider}</strong> to <strong>${data.recipientPhone}</strong>. (Message ID: ${data.messageId})`;
+      fb.classList.remove('hidden');
+      loadState();
+    }
+
+    // Initialize
+    initTheme();
     loadState();
+    loadPostMortem();
   </script>
 </body>
 </html>
