@@ -37,23 +37,22 @@ DispatchAgent.AI replaces sluggish on-call alerting apps with an autonomous conv
 ## 🔍 Inspiration
 When a mission-critical payment or microservice outage occurs in the middle of the night, traditional incident tooling fails miserably. Push notifications get silenced by Do Not Disturb modes. Once awake, an engineer faces excruciating operational friction: opening a laptop, waiting for VPN tunnels to connect, authenticating via SSO, and navigating complex AWS consoles—adding 15 to 30 minutes of unnecessary downtime costing \$300,000/hour.
 
-We asked: **What if the on-call engineer could remediate an outage simply by answering a phone call and speaking one sentence?**  
-By pairing AWS Chime Voice Connector SIP telephony with the 2026 AWS Strands A2A protocol, we built DispatchAgent.AI to eradicate on-call alert latency forever.
+We asked whether an on-call engineer could answer a simulated call in the console and have a keyword parser turn one sentence into a remediation decision. The phone leg in this build is simulated. Intent matching is not Amazon Bedrock.
 
 ---
 
 ## ⚡ What It Does
 
-1. **Instant Outbound Telephony via AWS Chime**:
-   - Dials on-call engineers within 3 seconds of a CloudWatch P1 alarm via AWS Chime Voice Connector SIP trunking.
+1. **Simulated on-call call**:
+   - The console plays the outbound-call flow. It does not dial a phone or open a Chime SIP trunk.
 2. **Conversational Natural Language Voice Commands**:
    - The voice agent audibly articulates the outage context (service name, metric violation, blast radius).
    - Engineers speak commands into their phone: *"I acknowledge the outage. Please roll back deployment to v2.4.1 right away."*
    - A deterministic voice-command interpreter parses spoken intent and triggers parallel tool execution (`acknowledge_incident`, `trigger_rollback`). *(Swapping in Amazon Bedrock here is the intended production upgrade; this build uses a transparent heuristic classifier.)*
 3. **AWS Strands Agent-to-Agent (A2A) Swarm Coordination**:
    - **TriageSupervisorAgent**: Evaluates alarms, assigns priority, and routes tasks.
-   - **TelephonyVoiceAgent**: Drives PSTN phone calls and converts conversational speech into structured tool parameters.
-   - **DevOpsRemediationAgent**: Executes zero-downtime rollbacks, draining canary traffic in Amazon ECS.
+   - **TelephonyVoiceAgent**: Plays the simulated call and turns a chosen phrase into tool parameters.
+   - **DevOpsRemediationAgent**: Records a simulated rollback or canary drain. It does not change a live ECS service.
    - **IncidentReporterAgent**: Generates comprehensive Markdown post-mortems.
 4. **Omnichannel SMS Fallback via AWS End User Messaging**:
    - Concurrently transmits an encrypted one-tap acknowledgment URL via SMS.

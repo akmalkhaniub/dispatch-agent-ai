@@ -10,7 +10,7 @@
 ## Slide 1: Title & Hero
 ### **DispatchAgent.AI**
 #### Autonomous Telephony Voice & Strands A2A Incident Response
-*Powered by AWS Chime Voice Connector, AWS Strands A2A Protocol, and Amazon Bedrock*
+*Simulated on-call call, keyword intent, and an agent-to-agent incident log. Not a live Chime trunk and not Amazon Bedrock.*
 
 - **Presenter:** Akmal Khan
 - **Hackathon:** AWS CDS Agentic AI Partner Hackathon 2026 (Devpost)
@@ -30,7 +30,7 @@
 
 ## Slide 3: The Solution — DispatchAgent.AI
 ### **Autonomous Voice Telephony + Multi-Agent Swarm**
-- **Instant Outbound Phone Call**: Initiates an interactive telephone call via AWS Chime Voice Connector within 3 seconds of a CloudWatch P1 alarm.
+- **Simulated on-call call**: The console plays the call locally. It does not dial a phone or open a Chime SIP trunk.
 - **Natural Language Conversational Voice Interface**:
   - The voice agent audibly summarizes the outage severity, impacted microservice, and blast radius.
   - Understands spoken commands (*"I acknowledge the incident, rollback deployment to v2.4.1"*).
@@ -69,11 +69,11 @@
 
 ## Slide 5: Deep AWS Communication Developer Services Integration
 ### **Production-Grade Telephony & Multi-Agent Standard**
-1. **AWS Chime Voice Connector (SIP Trunking)**:
-   - High-fidelity outbound PSTN/SIP dialer with sub-second call setup latency.
-   - Bidirectional audio streaming into Bedrock conversational pipelines.
-2. **AWS End User Messaging (SMS Gateway)**:
-   - Instant multi-channel fallback: simultaneously transmits an encrypted one-tap acknowledgment link.
+1. **Simulated call (this build)**:
+   - The console plays the outbound-call flow. There is no Chime SIP trunk and no PSTN dial.
+   - Intent is a keyword parser, not a Bedrock speech pipeline.
+2. **AWS End User Messaging (SMS)**:
+   - Sends when AWS SNS credentials and a topic are set. Otherwise the send is recorded locally and labelled simulated.
 3. **AWS Strands A2A (Agent-to-Agent) Specification**:
    - Implements 2026 typed A2A message routing (`A2A_ALERT_INGESTED`, `A2A_DISPATCH_CALL`, `A2A_TRIGGER_ROLLBACK`, `A2A_POSTMORTEM_READY`).
    - Completely decoupled multi-agent swarm architecture.

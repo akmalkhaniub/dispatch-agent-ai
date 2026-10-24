@@ -7,9 +7,9 @@
 [![Tests: 100% Passing](https://img.shields.io/badge/Tests-7%2F7%20Passed-emerald.svg)](./test)
 
 > **Built for the [AWS Cloud Development Series: Agentic AI Edition (Devpost)](https://aws-cds-agentic.devpost.com/)**  
-> *Submission Deadline: October 18, 2026*
+> *Submission Deadline: October 28, 2026, 1:00pm PDT*
 
-DispatchAgent.AI is an autonomous multi-agent incident response system designed to replace sluggish on-call paging apps. When a critical P1 outage triggers in CloudWatch, DispatchAgent initiates an outbound phone call via **AWS Chime Voice Connector**, speaks directly with the on-call engineer, parses natural language spoken commands via **Amazon Bedrock**, coordinates remediation across a multi-agent swarm using the open **AWS Strands Agent-to-Agent (A2A) protocol**, and autonomously triggers ECS rollbacks or canary drains within seconds.
+DispatchAgent.AI walks an on-call incident from alarm to a spoken command to a remediation decision. The phone leg is a **simulated** call, not a live AWS Chime PSTN connection. Spoken intent is a keyword heuristic, not Amazon Bedrock. Rollback and canary actions are simulated. SMS is sent only when AWS SNS credentials and a topic are configured.
 
 ---
 
@@ -19,13 +19,13 @@ DispatchAgent.AI is an autonomous multi-agent incident response system designed 
 [ Amazon CloudWatch P1 Outage Alarm ]
                  │
                  ▼
-     [ TriageSupervisorAgent ] (Bedrock AgentCore Supervisor)
+     [ TriageSupervisorAgent ] (incident triage)
                  │
         ┌────────┴──────────────────────────┐
         ▼ (A2A Message: A2A_DISPATCH_CALL)  ▼
  [ TelephonyVoiceAgent ]            [ DevOpsRemediationAgent ]
-  ├── AWS Chime SIP Outbound Trunk   ├── Autonomous Rollback (v2.4.1)
-  ├── Bedrock Voice Tool Calling     ├── Canary Traffic Drain
+  ├── Simulated call (no PSTN)       ├── Simulated rollback
+  ├── Keyword intent parser          ├── Simulated canary drain
   └── On-Call Engineer: Alex Chen    └── ECS Service Auto-Scaling
         │                                    │
         └──► Spoken Voice Command            │
@@ -41,13 +41,13 @@ DispatchAgent.AI is an autonomous multi-agent incident response system designed 
 ### 1. AWS Strands SDK & Agent-to-Agent (A2A) Protocol
 Implements AWS's 2026 open A2A specification with dynamic agent discovery, typed message routing, and collaborative multi-agent execution across specialized roles.
 
-### 2. Autonomous Telephony Voice Agent via AWS Chime
-Replaces passive mobile push alerts with interactive phone calls via AWS Chime Voice Connector. The voice agent speaks the incident summary, detects conversational intent, and supports instant turn-taking.
+### 2. Simulated on-call call
+The console plays the outbound-call flow locally. It does not open a Chime SIP trunk or place a PSTN call. The agent prompt is a scripted line, and the engineer’s reply is chosen from buttons.
 
-### 3. Natural Language Voice Command Tool Execution
-Engineers can issue voice commands like:
+### 3. Keyword voice commands
+Buttons send phrases such as:
 > *"I acknowledge the outage. Please roll back deployment to v2.4.1 right away."*  
-The agent executes the `acknowledge_incident` and `trigger_rollback` tools in parallel, confirming the action audibly before hanging up.
+The keyword parser runs `acknowledge_incident` and `trigger_rollback`. The rollback result is marked simulated.
 
 ### 4. Automated Post-Mortem & Timeline Synthesis
 The `IncidentReporterAgent` automatically collates telemetry logs, timestamps, blast radius assessments, and corrective actions into an executive Markdown post-mortem document.
