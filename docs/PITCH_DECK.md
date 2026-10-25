@@ -15,7 +15,7 @@
 - **Presenter:** Akmal Khan
 - **Hackathon:** AWS CDS Agentic AI Partner Hackathon 2026 (Devpost)
 - **Repository:** [https://github.com/akmalkhaniub/dispatch-agent-ai](https://github.com/akmalkhaniub/dispatch-agent-ai)
-- **Visual:** Mission Control Room with Outbound Chime Voice Telephony & Strands Swarm
+- **Visual:** Mission Control Room with a simulated on-call call and the Strands swarm
 
 ---
 

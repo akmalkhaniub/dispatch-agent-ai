@@ -19,6 +19,7 @@ export const CASES: Case[] = [
   { spoken: 'Ack and roll back to v2.3.0 immediately.', expected: ['acknowledge_incident', 'trigger_rollback'] },
   { spoken: "I'm not available, escalate to secondary.", expected: ['escalate_call'] },
   { spoken: 'Understood, got it, revert the last release.', expected: ['acknowledge_incident', 'trigger_rollback'] },
+  { spoken: 'Drain the canary traffic.', expected: ['drain_canary'] },
   { spoken: 'Give me the current metrics.', expected: [] }, // no actionable tool
 ];
 

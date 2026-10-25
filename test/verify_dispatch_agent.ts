@@ -19,19 +19,21 @@ const incident = triage.ingestAlert({
 assert(incident.status === 'DISPATCHING', 'Incident initial state must be DISPATCHING');
 console.log(`   ✅ Incident [${incident.id}] ingested with severity ${incident.severity}.`);
 
-console.log('2️⃣ Testing AWS Chime Voice Outbound Call Initiation...');
+console.log('2️⃣ Testing simulated outbound call...');
 const callResult = await voice.initiateCall(incident.id);
 assert(callResult.status === 'CONNECTED', 'Voice call must connect');
 assert(callResult.agentSpokenPrompt.includes('checkout-payment-api'), 'Prompt must mention service');
 assert(triage.getIncident(incident.id)!.status === 'CALL_IN_PROGRESS', 'Status must transition to CALL_IN_PROGRESS');
 console.log('   📞 Call connected.');
 
-console.log('3️⃣ Testing Natural Language Voice Command & Multi-Tool Execution...');
+console.log('3️⃣ Testing keyword commands: acknowledge, rollback, and canary drain...');
 const responseResult = await voice.processSpokenInput(callResult.callId, 'I acknowledge the outage. Please roll back deployment to v2.4.1 right away.');
 assert(responseResult.actionsTaken.length === 2, 'Should trigger 2 tool executions');
 assert(responseResult.actionsTaken.some((a) => a.tool === 'acknowledge_incident'), 'Must execute acknowledge tool');
 assert(responseResult.actionsTaken.some((a) => a.tool === 'trigger_rollback' && a.targetVersion === 'v2.4.1'), 'Must execute rollback to v2.4.1');
-console.log('   ⚙️ Tools Executed:', responseResult.actionsTaken.map((a) => a.tool).join(', '));
+const drain = await voice.processSpokenInput(callResult.callId, 'Also drain the canary.');
+assert(drain.actionsTaken.some((a) => a.tool === 'drain_canary' && a.status === 'SIMULATED'), 'Canary drain must be recorded as simulated');
+console.log('   ⚙️ Tools Executed:', responseResult.actionsTaken.map((a) => a.tool).join(', '), '+', drain.actionsTaken.map((a) => a.tool).join(', '));
 voice.hangUp(callResult.callId);
 
 console.log('4️⃣ Testing AWS End User Messaging SMS Gateway (simulator)...');

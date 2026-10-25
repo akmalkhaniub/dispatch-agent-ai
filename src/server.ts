@@ -69,7 +69,15 @@ export function createDispatchServer(): {
 
     try {
       if (req.url === '/api/health' && req.method === 'GET') {
-        return sendJson(res, 200, { status: 'online', service: 'DispatchAgent AI', timestamp: new Date().toISOString(), incidentCount: triage.activeIncidents.size });
+        return sendJson(res, 200, {
+          status: 'online',
+          service: 'DispatchAgent AI',
+          timestamp: new Date().toISOString(),
+          incidentCount: triage.activeIncidents.size,
+          bedrockMode: voice.bedrockAgent.isMock ? 'simulator' : 'live',
+          modelId: voice.bedrockAgent.modelId,
+          region: voice.bedrockAgent.region
+        });
       }
 
       if (req.url === '/api/state' && req.method === 'GET') {

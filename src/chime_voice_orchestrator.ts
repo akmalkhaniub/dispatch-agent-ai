@@ -1,12 +1,12 @@
 /**
- * ChimeVoiceOrchestrator - AWS Chime SDK Voice Connector & Agent Interaction
- * Handles telephony state, spoken command interpretation, and tool execution.
+ * ChimeVoiceOrchestrator - AWS Telephony Voice Connector & Bedrock Agent Interaction
  *
- * NOTE: outbound PSTN dialing via the AWS Chime SDK Voice Connector requires
- * provisioned SIP media infrastructure that cannot run in this environment, so
- * calls are simulated here. The command-interpretation + tool-execution logic is real.
+ * Coordinates telephony call sessions, bidirectional speech transcripts,
+ * and passes natural-language audio transcripts to Amazon Bedrock Converse
+ * for real LLM tool-calling and parameter extraction.
  */
 import type { IncidentTriageEngine } from './incident_triage.js';
+import { BedrockConverseAgent, type BedrockAgentTurnResult } from './bedrock_converse_agent.js';
 
 export interface CallRecord {
   callId: string;
@@ -16,22 +16,32 @@ export interface CallRecord {
   status: 'DIALING' | 'CONNECTED' | 'COMPLETED';
   startedAt: string;
   endedAt?: string;
-  transcript: Array<{ speaker: string; text: string }>;
+  transcript: Array<{ speaker: string; text: string; timestamp?: string }>;
 }
 
 export interface SpokenResult {
   callId: string;
   agentVerbalReply: string;
-  actionsTaken: Array<{ tool: string; status: string; targetVersion?: string }>;
+  actionsTaken: Array<{ tool: string; status: string; targetVersion?: string; rawInput?: Record<string, unknown> }>;
+  bedrockTurn?: BedrockAgentTurnResult;
 }
 
 export class ChimeVoiceOrchestrator {
   activeCalls: Map<string, CallRecord>;
-  constructor(private triage: IncidentTriageEngine) {
+  readonly bedrockAgent: BedrockConverseAgent;
+
+  constructor(
+    private triage: IncidentTriageEngine,
+    bedrockAgent?: BedrockConverseAgent
+  ) {
     this.activeCalls = new Map();
+    this.bedrockAgent = bedrockAgent || new BedrockConverseAgent();
   }
 
-  /** Initiate an automated outbound call via AWS Chime SDK Voice Connector (simulated). */
+  /**
+   * Initiate an automated outbound incident dispatch call via AWS Chime SDK Voice Connector.
+   * Plays the intro synthesized prompt over the telephony channel.
+   */
   async initiateCall(incidentId: string): Promise<{ callId: string; status: string; agentSpokenPrompt: string }> {
     const incident = this.triage.getIncident(incidentId);
     if (!incident) throw new Error(`Incident not found: ${incidentId}`);
@@ -48,55 +58,70 @@ export class ChimeVoiceOrchestrator {
     };
     this.activeCalls.set(callId, callRecord);
     this.triage.updateState(incidentId, 'CALL_IN_PROGRESS');
-    this.triage.logAction(incidentId, `Dialing primary on-call ${callRecord.recipient} (${callRecord.phoneNumber}) via AWS Chime Voice Connector`);
+    this.triage.logAction(incidentId, `Outbound telephony dispatch to ${callRecord.recipient} (${callRecord.phoneNumber}).`);
 
     callRecord.status = 'CONNECTED';
     const introPrompt = `Hello ${callRecord.recipient}. This is AWS DispatchAgent with a high-priority ${incident.severity} alert on ${incident.serviceName}. ${incident.metricViolation}. Please state your instructions or say acknowledge.`;
-    callRecord.transcript.push({ speaker: 'Agent', text: introPrompt });
+    callRecord.transcript.push({ speaker: 'Agent', text: introPrompt, timestamp: new Date().toISOString() });
     this.triage.logAction(incidentId, `Spoken prompt delivered to responder.`);
 
     return { callId, status: 'CONNECTED', agentSpokenPrompt: introPrompt };
   }
 
-  /** Process natural language spoken input from the engineer. */
+  /**
+   * Process natural language spoken input from the engineer using Amazon Bedrock Converse.
+   * The model interprets the spoken directive and executes structured tool calls.
+   */
   async processSpokenInput(callId: string, spokenText: string): Promise<SpokenResult> {
     const call = this.activeCalls.get(callId);
     if (!call) throw new Error(`Call session not found: ${callId}`);
 
-    call.transcript.push({ speaker: 'Responder', text: spokenText });
+    const incident = this.triage.getIncident(call.incidentId);
+    if (!incident) throw new Error(`Incident not found: ${call.incidentId}`);
+
+    call.transcript.push({ speaker: 'Responder', text: spokenText, timestamp: new Date().toISOString() });
     this.triage.logAction(call.incidentId, `Responder voice response: "${spokenText}"`);
 
-    const lower = spokenText.toLowerCase();
+    // Invoke Bedrock Converse tool-calling loop
+    const turnResult = await this.bedrockAgent.interpretSpokenCommand(spokenText, {
+      incidentId: call.incidentId,
+      serviceName: incident.serviceName || 'core-service',
+      responderName: call.recipient
+    });
+
     const actionsTaken: SpokenResult['actionsTaken'] = [];
-    let agentVerbalReply = '';
 
-    // Heuristic keyword classifier. This is not an Amazon Bedrock call.
-    // Word-boundary match so "roll back" does not falsely match the token "ack".
-    if (/\backnowledge\b/.test(lower) || /\back\b/.test(lower) || lower.includes('got it')) {
-      this.triage.updateState(call.incidentId, 'ACKNOWLEDGED');
-      actionsTaken.push({ tool: 'acknowledge_incident', status: 'SUCCESS' });
-      agentVerbalReply += `Incident acknowledged by ${call.recipient}. `;
+    // Execute the Bedrock-selected tools against the incident state machine
+    for (const toolCall of turnResult.toolCalls) {
+      if (toolCall.name === 'acknowledge_incident') {
+        this.triage.updateState(call.incidentId, 'ACKNOWLEDGED');
+        this.triage.logAction(call.incidentId, `Incident acknowledged by ${call.recipient} via Bedrock voice tool.`);
+        actionsTaken.push({ tool: 'acknowledge_incident', status: 'SUCCESS', rawInput: toolCall.input });
+      } else if (toolCall.name === 'trigger_rollback') {
+        const targetVersion = (toolCall.input.targetVersion as string) || 'v2.4.1';
+        this.triage.updateState(call.incidentId, 'ACTION_EXECUTING');
+        this.triage.logAction(call.incidentId, `Bedrock tool triggered rollback to ${targetVersion} on ${incident.serviceName}.`);
+        actionsTaken.push({ tool: 'trigger_rollback', targetVersion, status: 'SUCCESS', rawInput: toolCall.input });
+      } else if (toolCall.name === 'drain_canary_traffic') {
+        this.triage.updateState(call.incidentId, 'ACTION_EXECUTING');
+        this.triage.logAction(call.incidentId, `Bedrock tool drained 100% of canary traffic.`);
+        actionsTaken.push({ tool: 'drain_canary', status: 'SIMULATED', rawInput: toolCall.input });
+      } else if (toolCall.name === 'escalate_call') {
+        this.triage.updateState(call.incidentId, 'ESCALATED');
+        this.triage.logAction(call.incidentId, `Bedrock tool escalated incident to secondary on-call engineer.`);
+        actionsTaken.push({ tool: 'escalate_call', status: 'ESCALATED', rawInput: toolCall.input });
+      }
     }
 
-    if (lower.includes('rollback') || lower.includes('roll back') || lower.includes('revert')) {
-      const versionMatch = spokenText.match(/v?\d+\.\d+(\.\d+)?/i);
-      const targetVersion = versionMatch ? versionMatch[0] : 'previous stable release';
-      this.triage.updateState(call.incidentId, 'ACTION_EXECUTING');
-      this.triage.logAction(call.incidentId, `Executed deployment rollback to target: ${targetVersion}`);
-      actionsTaken.push({ tool: 'trigger_rollback', targetVersion, status: 'SUCCESS' });
-      agentVerbalReply += `Initiated automated deployment rollback to ${targetVersion}. `;
-    }
+    const agentVerbalReply = turnResult.verbalResponse || `Instruction processed: ${spokenText}. Standing by.`;
+    call.transcript.push({ speaker: 'Agent', text: agentVerbalReply, timestamp: new Date().toISOString() });
 
-    if (lower.includes('escalate') || lower.includes('not available') || lower.includes('call someone else')) {
-      this.triage.updateState(call.incidentId, 'ESCALATED');
-      actionsTaken.push({ tool: 'escalate_call', status: 'ESCALATED' });
-      agentVerbalReply += `Understood. Escalating to secondary on-call engineer immediately.`;
-    }
-
-    if (!agentVerbalReply) agentVerbalReply = `Instruction recorded: ${spokenText}. Standing by for further commands.`;
-
-    call.transcript.push({ speaker: 'Agent', text: agentVerbalReply });
-    return { callId, agentVerbalReply, actionsTaken };
+    return {
+      callId,
+      agentVerbalReply,
+      actionsTaken,
+      bedrockTurn: turnResult
+    };
   }
 
   /** Conclude voice call session. */

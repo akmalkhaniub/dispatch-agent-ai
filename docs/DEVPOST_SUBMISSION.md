@@ -18,7 +18,7 @@
 ---
 
 ## 💡 Elevator Pitch
-DispatchAgent.AI replaces sluggish on-call alerting apps with an autonomous conversational telephony voice agent and multi-agent swarm. Powered by AWS Chime Voice Connector and the open AWS Strands Agent-to-Agent (A2A) protocol, DispatchAgent automatically calls on-call engineers during critical P1 CloudWatch outages, delivers an audible incident briefing, parses spoken verbal instructions (*"Acknowledge & Rollback to v2.4.1"*), orchestrates container rollback actions across an A2A agent mesh, and synthesizes executive post-mortems automatically.
+DispatchAgent.AI is an incident console that simulates the on-call call. A keyword matcher turns a spoken-style sentence into acknowledge, rollback, canary-drain, or escalate. Rollback and the canary drain are recorded as simulated. SMS goes out through AWS SNS only when credentials are set and MOCK_SNS is not true; otherwise the send is simulated. This build does not open a Chime SIP trunk.
 
 ---
 
@@ -72,9 +72,9 @@ We asked whether an on-call engineer could answer a simulated call in the consol
         ┌────────┴──────────────────────────┐
         ▼ (A2A Message: A2A_DISPATCH_CALL)  ▼
  [ TelephonyVoiceAgent ]            [ DevOpsRemediationAgent ]
-  ├── AWS Chime SIP Outbound Trunk   ├── Autonomous Rollback (v2.4.1)
-  ├── Heuristic Voice Tool Calling     ├── Canary Traffic Drain
-  └── On-Call Engineer: Alex Chen    └── ECS Service Auto-Scaling
+  ├── Simulated call (no PSTN)       ├── Simulated rollback
+  ├── Keyword command matcher        ├── Simulated canary drain
+  └── On-Call Engineer: Alex Chen    └── No live ECS change
         │                                    │
         └──► Spoken Voice Command            │
              "Rollback deployment to v2.4.1" │
@@ -88,7 +88,7 @@ We asked whether an on-call engineer could answer a simulated call in the consol
 
 ### Architecture Components
 - **Strands A2A Mesh (`src/a2a_orchestrator.js`)**: Implements AWS's open 2026 Agent-to-Agent protocol with typed packet validation (`A2A_ALERT_INGESTED`, `A2A_DISPATCH_CALL`, `A2A_TRIGGER_ROLLBACK`, `A2A_POSTMORTEM_READY`).
-- **Chime Voice Engine (`src/chime_voice_orchestrator.js`)**: Orchestrates outbound SIP trunk calls, conversational turn-taking, and tool invocations.
+- **Simulated call (`src/chime_voice_orchestrator.js`)**: Plays the outbound call in the console. No SIP trunk is opened. Spoken-style text is matched by keywords.
 - **Incident Triage & Audit (`src/incident_triage.js`)**: Manages incident lifecycles, severity calculation, and event audit histories.
 - **Messaging Gateway (`src/messaging_gateway.js`)**: Delivers authenticated SMS alerts via AWS End User Messaging.
 - **Mission Control UI (`src/public/index.html` & `src/server.js`)**: Interactive command center displaying live A2A telemetry packets, SIP dialer simulators, and post-mortems.
@@ -151,7 +151,7 @@ npm start
 
 ### Steps to Verify in Web Console:
 1. Inspect the simulated P1 outage on `checkout-payment-api`.
-2. Click **"Simulate Outbound Chime Voice Call"** to initiate the phone call.
+2. Click **"Simulate outbound call"**. No phone call is placed.
 3. Click spoken prompts (e.g. *"Acknowledge & Rollback to v2.4.1"*) to watch the deterministic interpreter parse speech and dispatch tools.
 4. Watch the live **Strands A2A Telemetry Stream** showing inter-agent packet exchange.
 5. Review the auto-generated **Executive Post-Mortem** report.

@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node dist/server.js",
-    "test": "npm run typecheck && tsx test/verify_dispatch_agent.ts && tsx test/eval.test.ts && tsx test/server_integration.ts",
+    "test": "npm run typecheck && tsx test/verify_dispatch_agent.ts && tsx test/bedrock_converse.test.ts && tsx test/eval.test.ts && tsx test/server_integration.ts",
     "docker:build": "docker build -t dispatch-agent-ai:latest .",
     "docker:run": "docker run -d -p 3003:3003 --name dispatch-agent-ai dispatch-agent-ai:latest",
     "docker:compose": "docker compose up -d",
@@ -20,6 +20,7 @@
     "coverage": "c8 sh -c \"tsx test/verify_dispatch_agent.ts && tsx test/eval.ts && tsx test/server_integration.ts\""
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1156.0",
     "@aws-sdk/client-sns": "^3.1135.0",
     "dotenv": "^16.4.7"
   },
