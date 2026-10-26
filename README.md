@@ -14,6 +14,16 @@ DispatchAgent.AI is an autonomous SRE incident response swarm. When a high-prior
 
 ---
 
+## 🎬 Live Interactive Walkthrough
+
+<p align="center">
+  <img src="docs/assets/demo.gif" alt="DispatchAgent.AI Interactive Walkthrough" width="900px" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); border: 1px solid #30363d;" />
+</p>
+
+> **Autonomous Incident Remediation**: When a P1 outage strikes, DispatchAgent connects an on-call voice channel, invokes Amazon Bedrock Nova Pro tool calling (`trigger_rollback` to stable version `v2.4.1`), drafts an immediate post-mortem, and provides full light/dark UI accessibility.
+
+---
+
 ## ⚡ 2026 Architecture: Strands A2A Swarm & Bedrock Converse
 
 ```mermaid
